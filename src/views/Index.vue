@@ -6,10 +6,10 @@ import type { EChartsType } from "echarts";
 
 const dataArr = [135, 147, 150, 218, 224, 230, 260];
 const everyTime = 1;
-const max = 5;
 let dataNum = 0;
 const chartRef = ref<HTMLDivElement>();
 let chart: EChartsType | null = null;
+let isInChart = false;
 const options: any = {
   animation: false,
   tooltip: {
@@ -21,24 +21,13 @@ const options: any = {
     }
   },
   dataZoom: [
-    {
-      type: "inside",
-      filterMode: "empty",
-      xAxisIndex: [0],
-      // maxValueSpan: max
-    },
-    {
-      type: "slider",
-      filterMode: "empty",
-      xAxisIndex: [0],
-      // maxValueSpan: max
-    }
+    { type: "inside", filterMode: "empty", xAxisIndex: [0] },
+    { type: "slider", filterMode: "empty", xAxisIndex: [0] }
   ],
   xAxis: {
     type: "category",
     data: [],
     interval: 0,
-    scale: true,
     axisLabel: {
       showMaxLabel: true,
     }
@@ -58,32 +47,39 @@ const { pause: stopAddData, resume: addData } = useIntervalFn(() => {
     options.series.data.push(random);
   }
   const { length } = options.series.data;
-  chart?.setOption({
-    dataZoom: [
+  const startValue = length > 6 ? length - 6 : 0;
+  const newOption: any = {
+    xAxis: options.xAxis,
+    series: options.series
+  };
+
+  if (isInChart) {
+    newOption.dataZoom = [
+      { type: "inside", filterMode: "empty", xAxisIndex: [0] },
+      { type: "slider", filterMode: "empty", xAxisIndex: [0] }
+    ];
+  } else {
+    newOption.dataZoom = [
       {
         type: "inside",
         filterMode: "empty",
         xAxisIndex: [0],
-        startValue: length > 6 ? length - 6 : 0,
+        startValue,
         endValue: length
       },
       {
         type: "slider",
         filterMode: "empty",
         xAxisIndex: [0],
-        startValue: length > 6 ? length - 6 : length,
+        startValue,
         endValue: length
       }
-    ],
-    xAxis: options.xAxis,
-    series: options.series
-  });
+    ];
+  }
+  chart?.setOption(newOption);
 }, 500);
-const toEnd = () => {
-  chart?.dispatchAction({
-    type: "dataZoom",
-    end: 80
-  });
+const setIsInChart = (state: boolean) => {
+  isInChart = state;
 };
 
 onMounted(async () => {
@@ -102,7 +98,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="chartRef" class="charts-box" />
+  <div ref="chartRef" class="charts-box" @mouseover="setIsInChart(true)" @mouseout="setIsInChart(false)" />
 </template>
 
 <style lang="scss" scoped>
