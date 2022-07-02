@@ -25,13 +25,13 @@ const options: any = {
       type: "inside",
       filterMode: "empty",
       xAxisIndex: [0],
-      maxValueSpan: max
+      // maxValueSpan: max
     },
     {
       type: "slider",
       filterMode: "empty",
       xAxisIndex: [0],
-      maxValueSpan: max
+      // maxValueSpan: max
     }
   ],
   xAxis: {
@@ -57,7 +57,24 @@ const { pause: stopAddData, resume: addData } = useIntervalFn(() => {
     options.xAxis.data.push(`第${++dataNum}条`);
     options.series.data.push(random);
   }
+  const { length } = options.series.data;
   chart?.setOption({
+    dataZoom: [
+      {
+        type: "inside",
+        filterMode: "empty",
+        xAxisIndex: [0],
+        startValue: length > 6 ? length - 6 : 0,
+        endValue: length
+      },
+      {
+        type: "slider",
+        filterMode: "empty",
+        xAxisIndex: [0],
+        startValue: length > 6 ? length - 6 : length,
+        endValue: length
+      }
+    ],
     xAxis: options.xAxis,
     series: options.series
   });
@@ -85,10 +102,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div>
-    <div ref="chartRef" class="charts-box" />
-    <span class="btn-primary" @click="toEnd">移动</span>
-  </div>
+  <div ref="chartRef" class="charts-box" />
 </template>
 
 <style lang="scss" scoped>
@@ -102,15 +116,5 @@ onBeforeUnmount(() => {
   left: 0;
   margin: auto;
   border: 5px dashed #ccc;
-}
-.btn-primary {
-  background-color: #66ccff;
-  color: #fff;
-  font-size: 12px;
-  padding: 10px 20px;
-  border-radius: 5px;
-  display: inline-block;
-  cursor: pointer;
-  user-select: none;
 }
 </style>
